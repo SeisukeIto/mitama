@@ -57,3 +57,6 @@ class Model():
         else:
             raise Exception('Id not given')
         return node
+    @property
+    def query(self):
+        return self._query()

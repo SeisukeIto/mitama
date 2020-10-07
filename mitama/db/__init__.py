@@ -33,13 +33,12 @@ class _QueryProperty:
 
 class _Database(_Singleton):
     engine = None
-    session = None
     def __init__(self, model = None, metadata = None, query_class = orm.Query):
         self.Query = query_class
         self.Model = self.make_declarative_base(model, metadata)
     def set_engine(self, engine):
         self.engine = engine
-        self.session = scoped_session(
+        self._session = scoped_session(
             sessionmaker(
                 autocommit = False,
                 autoflush = False,
@@ -59,10 +58,11 @@ class _Database(_Singleton):
             model.metadata = metadata
         if not getattr(model, 'query_class', None):
             model.query_class = self.Query
-        model.query = _QueryProperty(self)
+        model._query = lambda x: _QueryProperty(self)
         return model
+    @property
     def session(self):
-        return self.session
+        return self._session
     def create_all(self):
         self.Model.metadata.create_all(self.engine)
 
